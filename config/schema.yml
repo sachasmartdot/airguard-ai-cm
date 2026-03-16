@@ -1,0 +1,277 @@
+# ============================================================
+# AirGuard AI CM — Contrat de Données
+# schema.yml
+#
+# Ce fichier est la SEULE source de vérité sur la structure
+# des données attendues. Quand les vraies données arrivent,
+# modifier UNIQUEMENT ce fichier.
+#
+# Auteur : AirGuard Team
+# Version : 1.0.0
+# Date : 2026-03-12
+# ============================================================
+
+dataset:
+  name: "cameroon_meteo_hackathon"
+  description: "Données météorologiques journalières — 42 villes du Cameroun"
+  version: "1.0.0"
+  source: "IndabaX Hackathon Cameroun 2026"
+  grain: "1 ligne = 1 ville x 1 jour"
+
+# ── Colonnes attendues ───────────────────────────────────────
+columns:
+
+  # Identifiants temporels
+  - name: date
+    type: date
+    format: "%Y-%m-%d"
+    nullable: false
+    description: "Date de la mesure"
+    role: dimension
+    dim_table: DIM_DATE
+
+  # Identifiants géographiques
+  - name: ville
+    type: string
+    nullable: false
+    description: "Nom de la ville"
+    role: dimension
+    dim_table: DIM_VILLE
+
+  - name: region
+    type: string
+    nullable: false
+    description: "Région administrative du Cameroun"
+    role: dimension
+    dim_table: DIM_VILLE
+    expected_values:
+      - "Adamaoua"
+      - "Centre"
+      - "Est"
+      - "Extrême-Nord"
+      - "Littoral"
+      - "Nord"
+      - "Nord-Ouest"
+      - "Ouest"
+      - "Sud"
+      - "Sud-Ouest"
+
+  - name: latitude
+    type: float
+    nullable: false
+    description: "Latitude géographique"
+    role: dimension
+    dim_table: DIM_VILLE
+    range: [1.5, 13.2]
+
+  - name: longitude
+    type: float
+    nullable: false
+    description: "Longitude géographique"
+    role: dimension
+    dim_table: DIM_VILLE
+    range: [8.3, 16.3]
+
+  - name: altitude_m
+    type: float
+    nullable: true
+    description: "Altitude en mètres"
+    role: dimension
+    dim_table: DIM_VILLE
+
+  - name: type_climat
+    type: string
+    nullable: false
+    description: "Type climatique de la ville"
+    role: dimension
+    dim_table: DIM_CLIMAT
+    expected_values:
+      - "equatorial"
+      - "highland"
+      - "sudano_guinean"
+      - "tropical"
+      - "sahelian"
+
+  # Variables météorologiques (mesures)
+  - name: temp_min_c
+    type: float
+    nullable: true
+    missing_threshold: 0.15
+    description: "Température minimale journalière en °C"
+    role: fact
+    fact_table: FAIT_POLLUTION
+    range: [-5.0, 50.0]
+
+  - name: temp_max_c
+    type: float
+    nullable: true
+    missing_threshold: 0.15
+    description: "Température maximale journalière en °C"
+    role: fact
+    fact_table: FAIT_POLLUTION
+    range: [0.0, 55.0]
+
+  - name: temp_mean_c
+    type: float
+    nullable: true
+    missing_threshold: 0.15
+    description: "Température moyenne journalière en °C"
+    role: fact
+    fact_table: FAIT_POLLUTION
+    range: [-2.0, 52.0]
+
+  - name: humidite_pct
+    type: float
+    nullable: true
+    missing_threshold: 0.15
+    description: "Humidité relative en pourcentage"
+    role: fact
+    fact_table: FAIT_POLLUTION
+    range: [0.0, 100.0]
+
+  - name: precipitations_mm
+    type: float
+    nullable: true
+    missing_threshold: 0.15
+    description: "Précipitations journalières en mm"
+    role: fact
+    fact_table: FAIT_POLLUTION
+    range: [0.0, 300.0]
+
+  - name: vitesse_vent_ms
+    type: float
+    nullable: true
+    missing_threshold: 0.15
+    description: "Vitesse du vent en m/s"
+    role: fact
+    fact_table: FAIT_POLLUTION
+    range: [0.0, 40.0]
+
+  - name: direction_vent_deg
+    type: float
+    nullable: true
+    missing_threshold: 0.12
+    description: "Direction du vent en degrés (0-360)"
+    role: fact
+    fact_table: FAIT_POLLUTION
+    range: [0.0, 360.0]
+
+  - name: rafale_max_ms
+    type: float
+    nullable: true
+    missing_threshold: 0.12
+    description: "Rafale maximale en m/s"
+    role: fact
+    fact_table: FAIT_POLLUTION
+    range: [0.0, 60.0]
+
+  - name: ensoleillement_h
+    type: float
+    nullable: true
+    missing_threshold: 0.15
+    description: "Durée d'ensoleillement en heures"
+    role: fact
+    fact_table: FAIT_POLLUTION
+    range: [0.0, 14.0]
+
+  - name: duree_jour_h
+    type: float
+    nullable: false
+    description: "Durée astronomique du jour en heures"
+    role: fact
+    fact_table: FAIT_POLLUTION
+    range: [10.0, 14.0]
+
+  - name: rayonnement_wm2
+    type: float
+    nullable: true
+    missing_threshold: 0.15
+    description: "Rayonnement solaire en W/m²"
+    role: fact
+    fact_table: FAIT_POLLUTION
+    range: [0.0, 1200.0]
+
+  # Variable cible (à prédire)
+  - name: pm25_proxy_ugm3
+    type: float
+    nullable: true
+    missing_threshold: 0.12
+    description: "Proxy PM2.5 en µg/m³ — variable cible ML"
+    role: target
+    fact_table: FAIT_POLLUTION
+    range: [0.0, 3000.0]
+
+  # Qualité des données
+  - name: qualite_capteur
+    type: string
+    nullable: false
+    description: "Niveau de qualité de la mesure"
+    role: metadata
+    expected_values:
+      - "high"
+      - "medium"
+      - "low"
+
+# ── Seuils de risque PM2.5 (WHO + contexte local) ───────────
+risk_thresholds:
+  low:
+    min: 0
+    max: 20
+    label_fr: "Faible"
+    label_en: "Low"
+    color: "#22c55e"
+    recommendation: "Qualité de l'air satisfaisante"
+
+  moderate:
+    min: 20
+    max: 35
+    label_fr: "Modéré"
+    label_en: "Moderate"
+    color: "#eab308"
+    recommendation: "Personnes sensibles : limitez les efforts prolongés"
+
+  high:
+    min: 35
+    max: 55
+    label_fr: "Élevé"
+    label_en: "High"
+    color: "#f97316"
+    recommendation: "Évitez les activités extérieures intenses"
+
+  critical:
+    min: 55
+    max: 9999
+    label_fr: "Critique"
+    label_en: "Critical"
+    color: "#ef4444"
+    recommendation: "Restez à l'intérieur. Portez un masque si sortie obligatoire."
+
+# ── Paramètres du pipeline ───────────────────────────────────
+pipeline:
+  target_column: "pm25_proxy_ugm3"
+  date_column: "date"
+  city_column: "ville"
+  region_column: "region"
+  lat_column: "latitude"
+  lon_column: "longitude"
+  climate_column: "type_climat"
+
+  # Colonnes features pour le modèle ML
+  feature_columns:
+    - temp_min_c
+    - temp_max_c
+    - temp_mean_c
+    - humidite_pct
+    - precipitations_mm
+    - vitesse_vent_ms
+    - direction_vent_deg
+    - rafale_max_ms
+    - ensoleillement_h
+    - duree_jour_h
+    - rayonnement_wm2
+
+  # Tolérance globale aux valeurs manquantes
+  max_missing_ratio: 0.15
+
+  # Fenêtre de prédiction
+  forecast_horizon_days: 7
