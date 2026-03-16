@@ -80,6 +80,22 @@ Dérivée des colonnes géographiques.
 | `type_climat` | Catégorie climatique |
 | `zone_risque_historique` | Calculé Sprint 2 (BI) |
 
+### DIM_CLIMAT: apres investigation - 16/03/2026
+
+| id | type_climat | description |
+|----|-------------|-------------|
+| 1 | equatorial | Chaud et humide, pluies toute l'année |
+| 2 | equatorial_coastal | Équatorial côtier, influence atlantique |
+| 3 | highland | Tempéré d'altitude, températures fraîches |
+| 4 | sudano_guinean | Transition savane-forêt, 2 saisons |
+| 5 | sudanian | Savane soudanienne, saison sèche marquée |
+| 6 | tropical | Saison sèche et saison des pluies marquées |
+| 7 | sahelian | Semi-aride, harmattan intense, peu de pluies |
+
+**Villes par type :**
+- equatorial_coastal : Buea, Douala, Edéa, Kribi, Limbe
+- sudanian : Figuil, Garoua, Guider, Poli, Rey-Bouba
+
 ### DIM_RISQUE
 Définie dans `config/schema.yml` — seuils PM2.5.
 

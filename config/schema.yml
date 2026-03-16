@@ -79,6 +79,7 @@ columns:
     role: dimension
     dim_table: DIM_VILLE
 
+# add eq_coastal et sudanien : 16/03/2026
   - name: type_climat
     type: string
     nullable: false
@@ -91,6 +92,8 @@ columns:
       - "sudano_guinean"
       - "tropical"
       - "sahelian"
+      - "equatorial_coastal"
+      - "sudanian"
 
   # Variables météorologiques (mesures)
   - name: temp_min_c
